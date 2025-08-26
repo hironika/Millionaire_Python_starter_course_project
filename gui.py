@@ -122,7 +122,7 @@ def show_question_window():
 
     question_root = tk.Tk()
     question_root.title("Вікно питань")
-    center_window(question_root, 900, 600)
+    center_window(question_root, 900, 650)
     question_root.configure(bg="#00001B")
 
     def create_popup_message(message):
@@ -200,23 +200,21 @@ def show_question_window():
         # Виконуємо команду, яка тепер викликає правильну логіку
         action_command()
 
-    try:
-        image_size = (30, 30)
-        lifeline_icons["50/50"]["blue"] = ImageTk.PhotoImage(Image.open("images/50_50_blue.png").resize(image_size))
-        lifeline_icons["50/50"]["yellow"] = ImageTk.PhotoImage(Image.open("images/50_50_yellow.png").resize(image_size))
-        lifeline_icons["50/50"]["red"] = ImageTk.PhotoImage(Image.open("images/50_50_red.png").resize(image_size))
+    image_size = (30, 30)
+    lifeline_icons["50/50"]["blue"] = ImageTk.PhotoImage(Image.open("images/50_50_blue.png").resize(image_size))
+    lifeline_icons["50/50"]["yellow"] = ImageTk.PhotoImage(Image.open("images/50_50_yellow.png").resize(image_size))
+    lifeline_icons["50/50"]["red"] = ImageTk.PhotoImage(Image.open("images/50_50_red.png").resize(image_size))
 
-        lifeline_icons["Дзвінок другу"]["blue"] = ImageTk.PhotoImage(Image.open("images/phone_blue.png").resize(image_size))
-        lifeline_icons["Дзвінок другу"]["yellow"] = ImageTk.PhotoImage(Image.open("images/phone_yellow.png").resize(image_size))
-        lifeline_icons["Дзвінок другу"]["red"] = ImageTk.PhotoImage(Image.open("images/phone_red.png").resize(image_size))
+    lifeline_icons["Дзвінок другу"]["blue"] = ImageTk.PhotoImage(Image.open("images/phone_blue.png").resize(image_size))
+    lifeline_icons["Дзвінок другу"]["yellow"] = ImageTk.PhotoImage(Image.open("images/phone_yellow.png").resize(image_size))
+    lifeline_icons["Дзвінок другу"]["red"] = ImageTk.PhotoImage(Image.open("images/phone_red.png").resize(image_size))
 
-        lifeline_icons["Допомога зали"]["blue"] = ImageTk.PhotoImage(Image.open("images/audience_blue.png").resize(image_size))
-        lifeline_icons["Допомога зали"]["yellow"] = ImageTk.PhotoImage(Image.open("images/audience_yellow.png").resize(image_size))
-        lifeline_icons["Допомога зали"]["red"] = ImageTk.PhotoImage(Image.open("images/audience_red.png").resize(image_size))
+    lifeline_icons["Допомога зали"]["blue"] = ImageTk.PhotoImage(Image.open("images/audience_blue.png").resize(image_size))
+    lifeline_icons["Допомога зали"]["yellow"] = ImageTk.PhotoImage(Image.open("images/audience_yellow.png").resize(image_size))
+    lifeline_icons["Допомога зали"]["red"] = ImageTk.PhotoImage(Image.open("images/audience_red.png").resize(image_size))
 
-    except FileNotFoundError:
-        print("Помилка: Не знайдено файли іконок. Переконайтеся, що вони в тій самій папці.")
-        lifeline_icons = {key: {"blue": None, "yellow": None, "red": None} for key in lifeline_icons.keys()}
+    money_icon = ImageTk.PhotoImage(Image.open("images/money.png").resize(image_size))
+
 
     decor_text = "─" * 20
 
@@ -315,6 +313,37 @@ def show_question_window():
         # Фрейм для підказок
         lifeline_frame = tk.Frame(question_root, bg="#00001B")
         lifeline_frame.pack(side="bottom", pady=30, ipadx=200)
+
+        # Логіка для кнопки "Забрати гроші"
+        def handle_take_money_click(prize_amount):
+            question_root.destroy()
+            show_result_window(is_winner=False, final_prize=prize_amount)
+
+        # Визначаємо суму, яку гравець може забрати
+        if current_question_number > 1:
+            # Якщо питання не перше, гравець забирає суму за попереднє питання
+            take_away_prize = game_logic.PRIZE_TIERS[current_question_number - 2]
+        else:
+            # На першому питанні гравець може забрати тільки 0
+            take_away_prize = 0
+
+        # Визначаємо, чи має бути кнопка активною
+        button_state = tk.NORMAL if current_question_number > 1 else tk.DISABLED
+
+        # Кнопка "Забрати гроші"
+        take_money_button = tk.Button(
+            question_root,
+            text="Забрати гроші",
+            font=("Helvetica", 12, "bold"),
+            bg="#FF3333",
+            fg="white",
+            relief="raised",
+            image=money_icon,
+            compound=tk.LEFT,
+            command=lambda: handle_take_money_click(take_away_prize),
+            state=button_state
+        )
+        take_money_button.place(relx=1.0, rely=1.0, x=-15, y=-30, anchor="se")
 
         lifelines_info = [
             ("50/50", "50/50", handle_50_50_click),
