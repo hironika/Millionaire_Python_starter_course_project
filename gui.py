@@ -24,14 +24,14 @@ lifeline_buttons = {}
 def create_intro_window():
     root = tk.Tk()
     root.title("Хто хоче стати мільйонером?")
-    root.geometry("800x600")
+    root.geometry("800x500")
     root.configure(bg="#00001B")
 
     def start_game():
         root.destroy()
         show_question_window()
 
-    title_label = tk.Label(root, text='Вітаємо на грі "Хто хоче стати мільйонером!"', font=("Helvetica", 24, "bold"),
+    title_label = tk.Label(root, text='Вітаємо на грі "Хто хоче стати мільйонером!"', font=("Helvetica", 21, "bold"),
                            padx=40, fg="#fff", bg="#B75F07")
     title_label.pack(pady=40)
 
@@ -87,14 +87,14 @@ def show_result_window(is_winner, final_prize=None):
         result_text = "Вітаємо! Ви перемогли та виграли 1 000 000 гривень!"
         label_color = "green"
     else:
-        final_prize_text = f"{final_prize} гривень" if final_prize else "нічого"
-        result_text = f"На жаль, ви програли. Ваш виграш складає {final_prize_text}."
+        final_prize_text = f"{final_prize} гривень" if final_prize else "0 грн"
+        result_text = f"На жаль, ви програли. Ваш виграш - {final_prize_text}."
         label_color = "red"
 
     result_label = tk.Label(
         result_root,
         text=result_text,
-        font=("Helvetica", 24, "bold"),
+        font=("Helvetica", 21, "bold"),
         fg=label_color,
         bg="#00001B"
     )
@@ -115,7 +115,7 @@ def show_question_window():
 
     question_root = tk.Tk()
     question_root.title("Вікно питань")
-    question_root.geometry("800x600")
+    question_root.geometry("900x600")
     question_root.configure(bg="#00001B")
 
     def create_popup_message(message):
@@ -222,6 +222,44 @@ def show_question_window():
     )
     prize_label.pack(pady=20)
 
+    # Призове дерево
+    prize_tree_frame = tk.Frame(question_root, bg="#00001B")
+    prize_tree_frame.pack(side="right", padx=20, pady=20, fill="y")
+
+    # Відображення призових сум
+    prize_labels = []
+    for i in range(14, -1, -1):
+        prize = game_logic.PRIZE_TIERS[i]
+
+        # Логіка кольорів
+        label_bg = "#00001B"  # Колір за замовчуванням
+        label_fg = "#F0F0F0"  # Колір тексту за замовчуванням
+
+        # Виділяємо поточне питання
+        if i == current_question_number - 1:
+            label_bg = "#B75F07"
+            label_fg = "white"
+
+        # Виділяємо незгораючі суми, якщо вони ще не досягнуті
+        elif i == 4 or i == 9:
+            # Якщо поточне питання далі, ніж незгораюча сума, вона стає зеленою
+            if current_question_number > i + 1:
+                label_bg = "#00A300"
+            else:
+                label_bg = "#404EE6"
+            label_fg = "black"
+
+        label = tk.Label(
+            prize_tree_frame,
+            text=f"{i + 1:02}. {prize:9,d} грн",
+            font=("Helvetica", 12, "bold"),
+            bg=label_bg,
+            fg=label_fg,
+            anchor="e"
+        )
+        label.pack(fill="x", pady=2)
+        prize_labels.append(label)
+
     current_question = game_logic.get_question_by_difficulty(current_question_number, used_questions)
 
     if current_question:
@@ -277,7 +315,7 @@ def show_question_window():
             ("Допомога зали", "Допомога зали", handle_ask_the_audience_click),
         ]
 
-        button_width = 250
+        button_width = 180
         button_height = 30
 
         # Створення контейнерів для кожної кнопки
