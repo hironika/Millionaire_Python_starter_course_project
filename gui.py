@@ -1,7 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import game_logic
-import questions
 
 # Глобальні змінні для відстеження стану
 used_questions = []
@@ -20,11 +19,19 @@ lifeline_icons = {
 }
 lifeline_buttons = {}
 
+def center_window(window, width, height):
+    """Центрує вікно на екрані."""
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width / 2) - (width / 2)
+    y = (screen_height / 2) - (height / 2)
+    window.geometry(f'{width}x{height}+{int(x)}+{int(y)}')
+
 
 def create_intro_window():
     root = tk.Tk()
     root.title("Хто хоче стати мільйонером?")
-    root.geometry("800x500")
+    center_window(root, 800, 600)
     root.configure(bg="#00001B")
 
     def start_game():
@@ -80,7 +87,7 @@ def create_answer_buttons(root, options, command):
 def show_result_window(is_winner, final_prize=None):
     result_root = tk.Tk()
     result_root.title("Результат гри")
-    result_root.geometry("800x600")
+    center_window(result_root, 800, 600)
     result_root.configure(bg="#00001B")
 
     if is_winner:
@@ -115,13 +122,13 @@ def show_question_window():
 
     question_root = tk.Tk()
     question_root.title("Вікно питань")
-    question_root.geometry("900x600")
+    center_window(question_root, 900, 600)
     question_root.configure(bg="#00001B")
 
     def create_popup_message(message):
         popup = tk.Toplevel(question_root)
         popup.title("Підказка")
-        popup.geometry("400x150")
+        center_window(popup, 400, 150)
         popup.configure(bg="#00001B")
 
         label = tk.Label(popup, text=message, font=("Helvetica", 14), fg="white", bg="#00001B", wraplength=350,
@@ -134,7 +141,7 @@ def show_question_window():
     def create_audience_popup(percentages):
         popup = tk.Toplevel(question_root)
         popup.title("Допомога зали")
-        popup.geometry("400x250")
+        center_window(popup, 400, 250)
         popup.configure(bg="#00001B")
 
         title_label = tk.Label(popup, text="Результати голосування:", font=("Helvetica", 16, "bold"), fg="white",
