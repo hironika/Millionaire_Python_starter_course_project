@@ -94,8 +94,8 @@ def show_result_window(is_winner, final_prize=None):
         result_text = "Вітаємо! Ви перемогли та виграли 1 000 000 гривень!"
         label_color = "green"
     else:
-        final_prize_text = f"{final_prize} гривень" if final_prize else "0 грн"
-        result_text = f"На жаль, ви програли. Ваш виграш - {final_prize_text}."
+        final_prize_text = f"{final_prize} грн" if final_prize else "0 грн"
+        result_text = f"Гру закінчено.\nВаш виграш складає - {final_prize_text}."
         label_color = "red"
 
     result_label = tk.Label(
