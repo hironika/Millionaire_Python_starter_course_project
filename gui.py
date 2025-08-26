@@ -35,6 +35,9 @@ def create_intro_window():
     root.configure(bg="#00001B")
 
     def start_game():
+        # Очищаємо список використаних питань при початку нової гри
+        global used_questions
+        used_questions.clear()
         root.destroy()
         show_question_window()
 
