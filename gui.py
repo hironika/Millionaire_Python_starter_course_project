@@ -195,19 +195,17 @@ def show_question_window():
 
     try:
         image_size = (30, 30)
-        lifeline_icons["50/50"]["blue"] = ImageTk.PhotoImage(Image.open("50_50_blue.png").resize(image_size))
-        lifeline_icons["50/50"]["yellow"] = ImageTk.PhotoImage(Image.open("50_50_yellow.png").resize(image_size))
-        lifeline_icons["50/50"]["red"] = ImageTk.PhotoImage(Image.open("50_50_red.png").resize(image_size))
+        lifeline_icons["50/50"]["blue"] = ImageTk.PhotoImage(Image.open("images/50_50_blue.png").resize(image_size))
+        lifeline_icons["50/50"]["yellow"] = ImageTk.PhotoImage(Image.open("images/50_50_yellow.png").resize(image_size))
+        lifeline_icons["50/50"]["red"] = ImageTk.PhotoImage(Image.open("images/50_50_red.png").resize(image_size))
 
-        lifeline_icons["Дзвінок другу"]["blue"] = ImageTk.PhotoImage(Image.open("phone_blue.png").resize(image_size))
-        lifeline_icons["Дзвінок другу"]["yellow"] = ImageTk.PhotoImage(
-            Image.open("phone_yellow.png").resize(image_size))
-        lifeline_icons["Дзвінок другу"]["red"] = ImageTk.PhotoImage(Image.open("phone_red.png").resize(image_size))
+        lifeline_icons["Дзвінок другу"]["blue"] = ImageTk.PhotoImage(Image.open("images/phone_blue.png").resize(image_size))
+        lifeline_icons["Дзвінок другу"]["yellow"] = ImageTk.PhotoImage(Image.open("images/phone_yellow.png").resize(image_size))
+        lifeline_icons["Дзвінок другу"]["red"] = ImageTk.PhotoImage(Image.open("images/phone_red.png").resize(image_size))
 
-        lifeline_icons["Допомога зали"]["blue"] = ImageTk.PhotoImage(Image.open("audience_blue.png").resize(image_size))
-        lifeline_icons["Допомога зали"]["yellow"] = ImageTk.PhotoImage(
-            Image.open("audience_yellow.png").resize(image_size))
-        lifeline_icons["Допомога зали"]["red"] = ImageTk.PhotoImage(Image.open("audience_red.png").resize(image_size))
+        lifeline_icons["Допомога зали"]["blue"] = ImageTk.PhotoImage(Image.open("images/audience_blue.png").resize(image_size))
+        lifeline_icons["Допомога зали"]["yellow"] = ImageTk.PhotoImage(Image.open("images/audience_yellow.png").resize(image_size))
+        lifeline_icons["Допомога зали"]["red"] = ImageTk.PhotoImage(Image.open("images/audience_red.png").resize(image_size))
 
     except FileNotFoundError:
         print("Помилка: Не знайдено файли іконок. Переконайтеся, що вони в тій самій папці.")
