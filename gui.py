@@ -3,13 +3,20 @@ from PIL import Image, ImageTk
 import game_logic
 import questions
 import json
-import os  # Додано для перевірки існування файлу
+import os
+import pygame
+
+# Ініціалізуємо pygame mixer
+pygame.mixer.init()
+pygame.mixer.music.set_endevent(pygame.USEREVENT)
 
 # Глобальні змінні для відстеження стану
 used_questions = []
 current_question_number = 1
 correct_answers_count = 0
 current_prize_money = 1000
+current_music = "hello.mp3"
+
 is_50_50_used = False
 is_phone_a_friend_used = False
 is_ask_the_audience_used = False
@@ -21,6 +28,12 @@ lifeline_icons = {
     "Допомога зали": {"blue": None, "yellow": None, "red": None}
 }
 lifeline_buttons = {}
+
+
+def play_background_music(music_file):
+    """Функція для відтворення музики. Приймає ім'я файлу."""
+    pygame.mixer.music.load(os.path.join("sounds", music_file))
+    pygame.mixer.music.play()
 
 
 def center_window(window, width, height):
@@ -55,11 +68,32 @@ def load_game():
     return False
 
 
+# Нова функція для керування музикою
+def manage_music(window):
+    global current_music
+    # Перевіряємо, чи музика не грає
+    if not pygame.mixer.music.get_busy():
+        # Якщо грав hello.mp3, переключаємось на closing.mp3
+        if current_music == "hello.mp3":
+            current_music = "closing.mp3"
+            play_background_music(current_music)
+        # Якщо грав closing.mp3 і закінчився, запускаємо його знову
+        elif current_music == "closing.mp3":
+            play_background_music(current_music)
+
+    # Викликаємо цю функцію знову через 1000 мс (1 секунду)
+    window.after(1000, lambda: manage_music(window))
+
+
 def create_intro_window():
     root = tk.Tk()
     root.title("Хто хоче стати мільйонером?")
     center_window(root, 800, 550)
     root.configure(bg="#00001B")
+
+    # Запускаємо першу мелодію і починаємо відстеження
+    play_background_music("hello.mp3")
+    manage_music(root)
 
     def start_new_game():
         # Скидаємо глобальні змінні для початку нової гри
@@ -73,12 +107,13 @@ def create_intro_window():
         is_phone_a_friend_used = False
         is_ask_the_audience_used = False
         used_questions = []
-
+        pygame.mixer.music.stop()
         root.destroy()
         show_question_window()
 
     def continue_game():
         if load_game():
+            pygame.mixer.music.stop()
             root.destroy()
             show_question_window()
         else:
@@ -105,13 +140,25 @@ def create_intro_window():
 
     start_button = tk.Button(button_container, text="Розпочати нову гру", font=("Helvetica", 16, "bold"), bg="#E89200",
                              relief="raised", command=start_new_game)
-    start_button.pack(side="left", padx=(0, 15), pady=40)  # Розміщуємо ліворуч з правим відступом
+    start_button.pack(side="left", padx=(0, 15), pady=40)
 
     load_button = tk.Button(button_container, text="Завантажити гру", font=("Helvetica", 16, "bold"), bg="#17AAB8",
                             relief="raised", command=continue_game, padx=20)
-    load_button.pack(side="left", padx=(15, 0), pady=40)  # Розміщуємо ліворуч з лівим відступом
+    load_button.pack(side="left", padx=(15, 0), pady=40)
 
-    root.mainloop()
+    # Видаляємо цей блок, щоб уникнути конфлікту mainloop()
+    # def check_music_end():
+    #     global current_music
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.USEREVENT:
+    #             if current_music == "hello.mp3":
+    #                 current_music = "closing.mp3"
+    #                 play_background_music()
+    #             # Ти можеш додати інші треки тут
+    #     root.after(100, check_music_end)
+    #
+    # check_music_end()
+    # root.mainloop()
 
 
 def create_answer_buttons(root, options, command):
@@ -161,7 +208,8 @@ def show_result_window(is_winner, final_prize=None):
     )
     result_label.pack(pady=50)
 
-    result_root.mainloop()
+    # Видаляємо зайвий mainloop()
+    # result_root.mainloop()
 
 
 def show_question_window():
@@ -449,9 +497,3 @@ def show_question_window():
     else:
         error_label = tk.Label(question_root, text="Помилка: Питання не знайдено.", fg="red", bg="#00001B")
         error_label.pack()
-
-    question_root.mainloop()
-
-
-if __name__ == "__main__":
-    create_intro_window()
