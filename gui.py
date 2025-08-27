@@ -27,6 +27,7 @@ lifeline_icons = {}
 lifeline_buttons = {}
 money_icon = None
 
+
 def load_all_icons():
     """Завантажує всі іконки в глобальні змінні після ініціалізації Tkinter."""
     global lifeline_icons, money_icon
@@ -53,10 +54,11 @@ def load_all_icons():
         lifeline_icons.clear()
         money_icon = None
 
+
 def play_background_music(music_file):
     """Функція для відтворення музики. Приймає ім'я файлу."""
     pygame.mixer.music.load(os.path.join("sounds", music_file))
-    pygame.mixer.music.play()
+    pygame.mixer.music.play(-1)  # Відтворення музики у нескінченному циклі
 
 
 def play_sound_effect(sound_file):
@@ -72,6 +74,7 @@ def center_window(window, width, height):
     x = (screen_width / 2) - (width / 2)
     y = (screen_height / 2) - (height / 2)
     window.geometry(f'{width}x{height}+{int(x)}+{int(y)}')
+
 
 def load_game():
     global current_question_number, correct_answers_count, current_prize_money
@@ -92,15 +95,6 @@ def load_game():
             return False
     return False
 
-def manage_music(window):
-    global after_id, current_music
-    if not pygame.mixer.music.get_busy():
-        if current_music == "hello.mp3":
-            current_music = "background.mp3"
-            play_background_music(current_music)
-        elif current_music == "background.mp3":
-            play_background_music(current_music)
-    after_id = window.after(1000, lambda: manage_music(window))
 
 def create_intro_window(root):
     # Очищуємо попередній контент
@@ -112,8 +106,9 @@ def create_intro_window(root):
     center_window(root, 800, 550)
     root.configure(bg="#00001B")
 
-    play_background_music("hello.mp3")
-    manage_music(root)
+    # Музика запускається тільки тут і більше не зупиняється
+    if not pygame.mixer.music.get_busy():
+        play_background_music("background.mp3")
 
     def start_new_game():
         global current_question_number, correct_answers_count, current_prize_money
@@ -129,8 +124,9 @@ def create_intro_window(root):
         is_phone_a_friend_used = False
         is_ask_the_audience_used = False
         used_questions = []
+
         play_sound_effect("klick.mp3")
-        pygame.mixer.music.stop()
+        # pygame.mixer.music.stop() - Цей рядок видалено
         show_question_window(root)
 
     def continue_game():
@@ -139,8 +135,9 @@ def create_intro_window(root):
             if after_id:
                 root.after_cancel(after_id)
                 after_id = None
+
             play_sound_effect("klick.mp3")
-            pygame.mixer.music.stop()
+            # pygame.mixer.music.stop() - Цей рядок видалено
             show_question_window(root)
         else:
             tk.messagebox.showinfo("Помилка", "Збережена гра не знайдена.")
@@ -171,6 +168,7 @@ def create_intro_window(root):
                             relief="raised", command=continue_game, padx=20)
     load_button.pack(side="left", padx=(15, 0), pady=40)
 
+
 def create_answer_buttons(root, options, command):
     button_frame = tk.Frame(root, bg="#00001B")
     button_frame.pack(pady=20, fill="x")
@@ -194,7 +192,11 @@ def create_answer_buttons(root, options, command):
 
     return buttons
 
+
 def show_result_window(root, is_winner, final_prize=None):
+    # pygame.mixer.music.stop() - Цей рядок видалено
+    # play_background_music("background.mp3") - Цей рядок також видалено
+
     for widget in root.winfo_children():
         widget.destroy()
 
@@ -220,6 +222,22 @@ def show_result_window(root, is_winner, final_prize=None):
     )
     result_label.pack(pady=50)
 
+    def handle_play_again():
+        play_sound_effect("klick.mp3")  # Звук кліка при натисканні
+        # pygame.mixer.music.stop() - Цей рядок видалено
+        create_intro_window(root)
+
+    play_again_button = tk.Button(
+        root,
+        text="Зіграти ще раз",
+        font=("Helvetica", 14, "bold"),
+        fg="white",
+        bg="#17AAB8",
+        command=handle_play_again
+    )
+    play_again_button.pack(pady=20)
+
+
 def show_question_window(root):
     global current_question_number
     global correct_answers_count
@@ -238,14 +256,19 @@ def show_question_window(root):
     center_window(root, 900, 650)
     root.configure(bg="#00001B")
 
+    # play_background_music("background.mp3") - Цей рядок видалено
+
     def handle_take_money_click(prize_amount):
         global after_id
         if after_id:
             root.after_cancel(after_id)
             after_id = None
-        show_result_window(root, is_winner=False, final_prize=prize_amount)
+
+        play_sound_effect("klick.mp3")  # Додаємо звук кліка перед переходом
+        root.after(200, lambda: show_result_window(root, is_winner=False, final_prize=prize_amount))
 
     def save_game():
+        play_sound_effect("klick.mp3")  # Додаємо звук кліка
         game_state = {
             "current_question_number": current_question_number,
             "correct_answers_count": correct_answers_count,
@@ -287,14 +310,17 @@ def show_question_window(root):
         ok_button.pack(pady=10)
 
     def handle_phone_a_friend_click():
+        play_sound_effect("klick.mp3")  # Додаємо звук кліка
         advice = game_logic.use_phone_a_friend_lifeline(current_question)
         create_popup_message(advice)
 
     def handle_ask_the_audience_click():
+        play_sound_effect("klick.mp3")  # Додаємо звук кліка
         audience_results = game_logic.use_ask_the_audience_lifeline(current_question)
         create_audience_popup(audience_results)
 
     def handle_50_50_click():
+        play_sound_effect("klick.mp3")  # Додаємо звук кліка
         new_options = game_logic.use_50_50_lifeline(current_question)
         for widget in answer_button_frame.winfo_children():
             widget.destroy()
@@ -393,6 +419,8 @@ def show_question_window(root):
         def check_and_proceed_answer(player_answer):
             global current_question_number, correct_answers_count, current_prize_money, after_id
 
+            play_sound_effect("klick.mp3")  # Додаємо звук кліка перед переходом
+
             if after_id:
                 root.after_cancel(after_id)
                 after_id = None
@@ -409,9 +437,11 @@ def show_question_window(root):
                 else:
                     current_question_number += 1
                     current_prize_money = game_logic.PRIZE_TIERS[current_question_number - 1]
-                    show_question_window(root)
+                    # Музика не зупиняється, просто оновлюється вікно
+                    root.after(200, lambda: show_question_window(root))
             else:
                 show_result_window(root, is_winner=False, final_prize=final_prize)
+
         answer_button_frame = tk.Frame(root, bg="#00001B")
         answer_button_frame.pack(pady=20, fill="x")
         create_answer_buttons(answer_button_frame, current_question["options"], check_and_proceed_answer)
@@ -485,11 +515,3 @@ def show_question_window(root):
     else:
         error_label = tk.Label(root, text="Помилка: Питання не знайдено.", fg="red", bg="#00001B")
         error_label.pack()
-
-# Основний потік програми
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.withdraw()
-    load_all_icons()
-    create_intro_window(root)
-    root.mainloop()
