@@ -58,6 +58,13 @@ def play_background_music(music_file):
     pygame.mixer.music.load(os.path.join("sounds", music_file))
     pygame.mixer.music.play()
 
+
+def play_sound_effect(sound_file):
+    """Відтворює одноразовий звуковий ефект."""
+    sound = pygame.mixer.Sound(os.path.join("sounds", sound_file))
+    sound.play()
+
+
 def center_window(window, width, height):
     """Центрує вікно на екрані."""
     screen_width = window.winfo_screenwidth()
@@ -89,9 +96,9 @@ def manage_music(window):
     global after_id, current_music
     if not pygame.mixer.music.get_busy():
         if current_music == "hello.mp3":
-            current_music = "closing.mp3"
+            current_music = "background.mp3"
             play_background_music(current_music)
-        elif current_music == "closing.mp3":
+        elif current_music == "background.mp3":
             play_background_music(current_music)
     after_id = window.after(1000, lambda: manage_music(window))
 
@@ -122,6 +129,7 @@ def create_intro_window(root):
         is_phone_a_friend_used = False
         is_ask_the_audience_used = False
         used_questions = []
+        play_sound_effect("klick.mp3")
         pygame.mixer.music.stop()
         show_question_window(root)
 
@@ -131,6 +139,7 @@ def create_intro_window(root):
             if after_id:
                 root.after_cancel(after_id)
                 after_id = None
+            play_sound_effect("klick.mp3")
             pygame.mixer.music.stop()
             show_question_window(root)
         else:
