@@ -20,21 +20,43 @@ current_music = "hello.mp3"
 is_50_50_used = False
 is_phone_a_friend_used = False
 is_ask_the_audience_used = False
+after_id = None
 
 # Глобальні словники для іконок і кнопок
-lifeline_icons = {
-    "50/50": {"blue": None, "yellow": None, "red": None},
-    "Дзвінок другу": {"blue": None, "yellow": None, "red": None},
-    "Допомога зали": {"blue": None, "yellow": None, "red": None}
-}
+lifeline_icons = {}
 lifeline_buttons = {}
+money_icon = None
 
+def load_all_icons():
+    """Завантажує всі іконки в глобальні змінні після ініціалізації Tkinter."""
+    global lifeline_icons, money_icon
+    try:
+        image_size = (30, 30)
+        lifeline_icons["50/50"] = {
+            "blue": ImageTk.PhotoImage(Image.open("images/50_50_blue.png").resize(image_size)),
+            "yellow": ImageTk.PhotoImage(Image.open("images/50_50_yellow.png").resize(image_size)),
+            "red": ImageTk.PhotoImage(Image.open("images/50_50_red.png").resize(image_size))
+        }
+        lifeline_icons["Дзвінок другу"] = {
+            "blue": ImageTk.PhotoImage(Image.open("images/phone_blue.png").resize(image_size)),
+            "yellow": ImageTk.PhotoImage(Image.open("images/phone_yellow.png").resize(image_size)),
+            "red": ImageTk.PhotoImage(Image.open("images/phone_red.png").resize(image_size))
+        }
+        lifeline_icons["Допомога зали"] = {
+            "blue": ImageTk.PhotoImage(Image.open("images/audience_blue.png").resize(image_size)),
+            "yellow": ImageTk.PhotoImage(Image.open("images/audience_yellow.png").resize(image_size)),
+            "red": ImageTk.PhotoImage(Image.open("images/audience_red.png").resize(image_size))
+        }
+        money_icon = ImageTk.PhotoImage(Image.open("images/money.png").resize(image_size))
+    except FileNotFoundError:
+        print("Помилка: Не знайдено файли іконок. Переконайтеся, що вони в тій самій папці.")
+        lifeline_icons.clear()
+        money_icon = None
 
 def play_background_music(music_file):
     """Функція для відтворення музики. Приймає ім'я файлу."""
     pygame.mixer.music.load(os.path.join("sounds", music_file))
     pygame.mixer.music.play()
-
 
 def center_window(window, width, height):
     """Центрує вікно на екрані."""
@@ -44,16 +66,13 @@ def center_window(window, width, height):
     y = (screen_height / 2) - (height / 2)
     window.geometry(f'{width}x{height}+{int(x)}+{int(y)}')
 
-
 def load_game():
     global current_question_number, correct_answers_count, current_prize_money
     global is_50_50_used, is_phone_a_friend_used, is_ask_the_audience_used, used_questions
-
     if os.path.exists("savegame.json"):
         try:
             with open("savegame.json", "r") as f:
                 game_state = json.load(f)
-
             current_question_number = game_state.get("current_question_number", 1)
             correct_answers_count = game_state.get("correct_answers_count", 0)
             current_prize_money = game_state.get("current_prize_money", 1000)
@@ -61,45 +80,41 @@ def load_game():
             is_phone_a_friend_used = game_state.get("is_phone_a_friend_used", False)
             is_ask_the_audience_used = game_state.get("is_ask_the_audience_used", False)
             used_questions = game_state.get("used_questions", [])
-
             return True
         except (IOError, json.JSONDecodeError):
             return False
     return False
 
-
-# Нова функція для керування музикою
 def manage_music(window):
-    global current_music
-    # Перевіряємо, чи музика не грає
+    global after_id, current_music
     if not pygame.mixer.music.get_busy():
-        # Якщо грав hello.mp3, переключаємось на closing.mp3
         if current_music == "hello.mp3":
             current_music = "closing.mp3"
             play_background_music(current_music)
-        # Якщо грав closing.mp3 і закінчився, запускаємо його знову
         elif current_music == "closing.mp3":
             play_background_music(current_music)
+    after_id = window.after(1000, lambda: manage_music(window))
 
-    # Викликаємо цю функцію знову через 1000 мс (1 секунду)
-    window.after(1000, lambda: manage_music(window))
+def create_intro_window(root):
+    # Очищуємо попередній контент
+    for widget in root.winfo_children():
+        widget.destroy()
 
-
-def create_intro_window():
-    root = tk.Tk()
+    root.deiconify()
     root.title("Хто хоче стати мільйонером?")
     center_window(root, 800, 550)
     root.configure(bg="#00001B")
 
-    # Запускаємо першу мелодію і починаємо відстеження
     play_background_music("hello.mp3")
     manage_music(root)
 
     def start_new_game():
-        # Скидаємо глобальні змінні для початку нової гри
         global current_question_number, correct_answers_count, current_prize_money
         global is_50_50_used, is_phone_a_friend_used, is_ask_the_audience_used, used_questions
-
+        global after_id
+        if after_id:
+            root.after_cancel(after_id)
+            after_id = None
         current_question_number = 1
         correct_answers_count = 0
         current_prize_money = 1000
@@ -108,14 +123,16 @@ def create_intro_window():
         is_ask_the_audience_used = False
         used_questions = []
         pygame.mixer.music.stop()
-        root.destroy()
-        show_question_window()
+        show_question_window(root)
 
     def continue_game():
+        global after_id
         if load_game():
+            if after_id:
+                root.after_cancel(after_id)
+                after_id = None
             pygame.mixer.music.stop()
-            root.destroy()
-            show_question_window()
+            show_question_window(root)
         else:
             tk.messagebox.showinfo("Помилка", "Збережена гра не знайдена.")
 
@@ -134,7 +151,6 @@ def create_intro_window():
     rules_label = tk.Label(root, text=rules_text, font=("Helvetica", 14), fg="#F0F0F0", bg="#00001B", justify="left")
     rules_label.pack(pady=20)
 
-    # Створення фрейму для кнопок
     button_container = tk.Frame(root, bg="#00001B")
     button_container.pack(pady=10)
 
@@ -145,21 +161,6 @@ def create_intro_window():
     load_button = tk.Button(button_container, text="Завантажити гру", font=("Helvetica", 16, "bold"), bg="#17AAB8",
                             relief="raised", command=continue_game, padx=20)
     load_button.pack(side="left", padx=(15, 0), pady=40)
-
-    # Видаляємо цей блок, щоб уникнути конфлікту mainloop()
-    # def check_music_end():
-    #     global current_music
-    #     for event in pygame.event.get():
-    #         if event.type == pygame.USEREVENT:
-    #             if current_music == "hello.mp3":
-    #                 current_music = "closing.mp3"
-    #                 play_background_music()
-    #             # Ти можеш додати інші треки тут
-    #     root.after(100, check_music_end)
-    #
-    # check_music_end()
-    # root.mainloop()
-
 
 def create_answer_buttons(root, options, command):
     button_frame = tk.Frame(root, bg="#00001B")
@@ -184,12 +185,14 @@ def create_answer_buttons(root, options, command):
 
     return buttons
 
+def show_result_window(root, is_winner, final_prize=None):
+    for widget in root.winfo_children():
+        widget.destroy()
 
-def show_result_window(is_winner, final_prize=None):
-    result_root = tk.Tk()
-    result_root.title("Результат гри")
-    center_window(result_root, 800, 600)
-    result_root.configure(bg="#00001B")
+    root.deiconify()
+    root.title("Результат гри")
+    center_window(root, 800, 600)
+    root.configure(bg="#00001B")
 
     if is_winner:
         result_text = "Вітаємо! Ви перемогли та виграли 1 000 000 гривень!"
@@ -200,7 +203,7 @@ def show_result_window(is_winner, final_prize=None):
         label_color = "red"
 
     result_label = tk.Label(
-        result_root,
+        root,
         text=result_text,
         font=("Helvetica", 21, "bold"),
         fg=label_color,
@@ -208,29 +211,30 @@ def show_result_window(is_winner, final_prize=None):
     )
     result_label.pack(pady=50)
 
-    # Видаляємо зайвий mainloop()
-    # result_root.mainloop()
-
-
-def show_question_window():
+def show_question_window(root):
     global current_question_number
     global correct_answers_count
     global current_prize_money
     global is_50_50_used
     global is_phone_a_friend_used
     global is_ask_the_audience_used
-    global lifeline_icons, lifeline_buttons
+    global lifeline_icons, lifeline_buttons, money_icon
     global used_questions
 
-    question_root = tk.Tk()
-    question_root.title("Вікно питань")
-    center_window(question_root, 900, 650)
-    question_root.configure(bg="#00001B")
+    # Очищуємо попередній контент
+    for widget in root.winfo_children():
+        widget.destroy()
 
-    # Перемістив ці функції на початок
+    root.title("Вікно питань")
+    center_window(root, 900, 650)
+    root.configure(bg="#00001B")
+
     def handle_take_money_click(prize_amount):
-        question_root.destroy()
-        show_result_window(is_winner=False, final_prize=prize_amount)
+        global after_id
+        if after_id:
+            root.after_cancel(after_id)
+            after_id = None
+        show_result_window(root, is_winner=False, final_prize=prize_amount)
 
     def save_game():
         game_state = {
@@ -247,7 +251,7 @@ def show_question_window():
         create_popup_message("Гра успішно збережена!")
 
     def create_popup_message(message):
-        popup = tk.Toplevel(question_root)
+        popup = tk.Toplevel(root)
         popup.title("Підказка")
         center_window(popup, 400, 150)
         popup.configure(bg="#00001B")
@@ -258,7 +262,7 @@ def show_question_window():
         ok_button.pack(pady=10)
 
     def create_audience_popup(percentages):
-        popup = tk.Toplevel(question_root)
+        popup = tk.Toplevel(root)
         popup.title("Допомога зали")
         center_window(popup, 400, 250)
         popup.configure(bg="#00001B")
@@ -294,7 +298,7 @@ def show_question_window():
                 (lifeline_name == "Допомога зали" and is_ask_the_audience_used):
             return
         lifeline_buttons[lifeline_name].config(image=lifeline_icons[lifeline_name]["yellow"])
-        question_root.after(250, lambda: finalize_lifeline_use(lifeline_name, action_command))
+        root.after(250, lambda: finalize_lifeline_use(lifeline_name, action_command))
 
     def finalize_lifeline_use(lifeline_name, action_command):
         global is_50_50_used, is_phone_a_friend_used, is_ask_the_audience_used
@@ -309,33 +313,9 @@ def show_question_window():
             is_ask_the_audience_used = True
         action_command()
 
-    # Завантаження іконок
-    money_icon = None
-    try:
-        image_size = (30, 30)
-        lifeline_icons["50/50"]["blue"] = ImageTk.PhotoImage(Image.open("images/50_50_blue.png").resize(image_size))
-        lifeline_icons["50/50"]["yellow"] = ImageTk.PhotoImage(Image.open("images/50_50_yellow.png").resize(image_size))
-        lifeline_icons["50/50"]["red"] = ImageTk.PhotoImage(Image.open("images/50_50_red.png").resize(image_size))
-        lifeline_icons["Дзвінок другу"]["blue"] = ImageTk.PhotoImage(
-            Image.open("images/phone_blue.png").resize(image_size))
-        lifeline_icons["Дзвінок другу"]["yellow"] = ImageTk.PhotoImage(
-            Image.open("images/phone_yellow.png").resize(image_size))
-        lifeline_icons["Дзвінок другу"]["red"] = ImageTk.PhotoImage(
-            Image.open("images/phone_red.png").resize(image_size))
-        lifeline_icons["Допомога зали"]["blue"] = ImageTk.PhotoImage(
-            Image.open("images/audience_blue.png").resize(image_size))
-        lifeline_icons["Допомога зали"]["yellow"] = ImageTk.PhotoImage(
-            Image.open("images/audience_yellow.png").resize(image_size))
-        lifeline_icons["Допомога зали"]["red"] = ImageTk.PhotoImage(
-            Image.open("images/audience_red.png").resize(image_size))
-        money_icon = ImageTk.PhotoImage(Image.open("images/money.png").resize(image_size))
-    except FileNotFoundError:
-        print("Помилка: Не знайдено файли іконок. Переконайтеся, що вони в тій самій папці.")
-        lifeline_icons = {key: {"blue": None, "yellow": None, "red": None} for key in lifeline_icons.keys()}
-
     decor_text = "─" * 20
     prize_label = tk.Label(
-        question_root,
+        root,
         text=f"{decor_text} ▸ Питання {current_question_number}. Сума: {current_prize_money} ◂ {decor_text}",
         font=("Helvetica", 16, "bold"),
         fg="#F0F0F0",
@@ -344,12 +324,12 @@ def show_question_window():
     prize_label.pack(pady=20)
 
     # Призове дерево
-    prize_tree_frame = tk.Frame(question_root, bg="#00001B")
+    prize_tree_frame = tk.Frame(root, bg="#00001B")
     prize_tree_frame.pack(side="right", padx=20, pady=20, fill="y")
 
     # Кнопка збереження гри
     save_button = tk.Button(
-        question_root,
+        root,
         text="Зберегти гру",
         font=("Helvetica", 12, "bold"),
         bg="#4CAF50",
@@ -391,7 +371,7 @@ def show_question_window():
     if current_question:
         used_questions.append(current_question["question"])
         question_label = tk.Label(
-            question_root,
+            root,
             text=current_question["question"],
             font=("Helvetica", 18, "bold"),
             fg="white",
@@ -402,35 +382,34 @@ def show_question_window():
         question_label.pack(pady=10)
 
         def check_and_proceed_answer(player_answer):
-            global current_question_number
-            global correct_answers_count
-            global current_prize_money
+            global current_question_number, correct_answers_count, current_prize_money, after_id
+
+            if after_id:
+                root.after_cancel(after_id)
+                after_id = None
+
             is_correct, final_prize = game_logic.handle_answer_logic(
                 player_answer,
                 current_question,
                 correct_answers_count
             )
-            question_root.destroy()
             if is_correct:
                 correct_answers_count += 1
                 if correct_answers_count == 15:
-                    show_result_window(is_winner=True)
+                    show_result_window(root, is_winner=True)
                 else:
                     current_question_number += 1
                     current_prize_money = game_logic.PRIZE_TIERS[current_question_number - 1]
-                    show_question_window()
+                    show_question_window(root)
             else:
-                show_result_window(is_winner=False, final_prize=final_prize)
-
-        answer_button_frame = tk.Frame(question_root, bg="#00001B")
+                show_result_window(root, is_winner=False, final_prize=final_prize)
+        answer_button_frame = tk.Frame(root, bg="#00001B")
         answer_button_frame.pack(pady=20, fill="x")
         create_answer_buttons(answer_button_frame, current_question["options"], check_and_proceed_answer)
 
-        # Фрейм для підказок
-        lifeline_frame = tk.Frame(question_root, bg="#00001B")
+        lifeline_frame = tk.Frame(root, bg="#00001B")
         lifeline_frame.pack(side="bottom", pady=30, ipadx=200)
 
-        # Логіка для кнопки "Забрати гроші"
         if current_question_number > 1:
             take_away_prize = game_logic.PRIZE_TIERS[current_question_number - 2]
         else:
@@ -438,7 +417,7 @@ def show_question_window():
         button_state = tk.NORMAL if current_question_number > 1 else tk.DISABLED
 
         take_money_button = tk.Button(
-            question_root,
+            root,
             text="Забрати гроші",
             font=("Helvetica", 12, "bold"),
             bg="#FF3333",
@@ -495,5 +474,13 @@ def show_question_window():
             lifeline_buttons[name] = button
 
     else:
-        error_label = tk.Label(question_root, text="Помилка: Питання не знайдено.", fg="red", bg="#00001B")
+        error_label = tk.Label(root, text="Помилка: Питання не знайдено.", fg="red", bg="#00001B")
         error_label.pack()
+
+# Основний потік програми
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.withdraw()
+    load_all_icons()
+    create_intro_window(root)
+    root.mainloop()

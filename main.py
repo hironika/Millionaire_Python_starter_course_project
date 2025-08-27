@@ -1,9 +1,12 @@
+import tkinter as tk
 import gui
-import tkinter as tk # Додаємо імпорт tkinter
 
 def main():
-    gui.create_intro_window()
-    tk.mainloop()  # Головний цикл має бути тут
+    root = tk.Tk()
+    root.withdraw()
+    gui.load_all_icons()
+    gui.create_intro_window(root)
+    root.mainloop()
 
 if __name__ == "__main__":
     main()
