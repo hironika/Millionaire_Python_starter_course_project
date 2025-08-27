@@ -5,6 +5,7 @@ import questions
 import json
 import os
 import pygame
+import webbrowser
 
 # Ініціалізуємо pygame mixer
 pygame.mixer.init()
@@ -231,7 +232,7 @@ def show_result_window(root, is_winner, final_prize=None):
         widget.destroy()
 
     root.deiconify()
-    root.title("Результат гри")
+    root.title("Результати вікторина «Хто хоче стати мільйонером?»")
     center_window(root, 800, 550)
     root.configure(bg="#00001B")
 
@@ -277,6 +278,16 @@ def show_result_window(root, is_winner, final_prize=None):
     exit_button = tk.Button(button_container, text="Вийти з гри", font=("Helvetica", 16, "bold"), bg="#17AAB8",
                             relief="raised", command=handle_exit_game, padx=20)
     exit_button.pack(side="left", padx=(15, 0), pady=40)
+
+    def open_telegram_profile():
+        webbrowser.open_new("https://t.me/tatyanakohan") # <-- Твоє посилання
+
+    telegram_link_label = tk.Label(root, text="Розробник у Telegram",
+                                   font=("Helvetica", 12, "underline"),
+                                   fg="#DEE0E2", bg="#00001B", cursor="hand2")
+    # Використовуємо .place() для точного позиціонування
+    telegram_link_label.place(relx=1.0, rely=1.0, x=-15, y=-15, anchor="se")
+    telegram_link_label.bind("<Button-1>", lambda e: open_telegram_profile())
 
 
 def show_question_window(root):
