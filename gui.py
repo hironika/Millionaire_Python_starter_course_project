@@ -58,7 +58,7 @@ def load_game():
 def create_intro_window():
     root = tk.Tk()
     root.title("Хто хоче стати мільйонером?")
-    center_window(root, 800, 600)
+    center_window(root, 800, 550)
     root.configure(bg="#00001B")
 
     def start_new_game():
@@ -84,8 +84,8 @@ def create_intro_window():
         else:
             tk.messagebox.showinfo("Помилка", "Збережена гра не знайдена.")
 
-    title_label = tk.Label(root, text='Вітаємо на грі "Хто хоче стати мільйонером!"', font=("Helvetica", 21, "bold"),
-                           padx=40, fg="#fff", bg="#B75F07")
+    title_label = tk.Label(root, text='Вітаємо на грі "Хто хоче стати мільйонером!"', font=("Helvetica", 19, "bold"),
+                           padx=80, fg="#fff", bg="#B75F07")
     title_label.pack(pady=40)
 
     rules_text = (
@@ -105,11 +105,11 @@ def create_intro_window():
 
     start_button = tk.Button(button_container, text="Розпочати нову гру", font=("Helvetica", 16, "bold"), bg="#E89200",
                              relief="raised", command=start_new_game)
-    start_button.pack(side="left", padx=(0, 15), pady=10)  # Розміщуємо ліворуч з правим відступом
+    start_button.pack(side="left", padx=(0, 15), pady=40)  # Розміщуємо ліворуч з правим відступом
 
     load_button = tk.Button(button_container, text="Завантажити гру", font=("Helvetica", 16, "bold"), bg="#17AAB8",
                             relief="raised", command=continue_game, padx=20)
-    load_button.pack(side="left", padx=(15, 0), pady=10)  # Розміщуємо ліворуч з лівим відступом
+    load_button.pack(side="left", padx=(15, 0), pady=40)  # Розміщуємо ліворуч з лівим відступом
 
     root.mainloop()
 
