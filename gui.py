@@ -578,4 +578,3 @@ def show_question_window(root):
     else:
         error_label = tk.Label(root, text="Помилка: Питання не знайдено.", fg="red", bg="#00001B")
         error_label.pack()
-        
