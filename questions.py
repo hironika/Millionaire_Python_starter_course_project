@@ -51,8 +51,8 @@ def get_all_questions():
             },
             {
                 "question": "Що є хімічною формулою води?",
-                "options": ["CO2", "O2", "H2O", "NaCl"],
-                "correct_answer": "H2O"
+                "options": ["CO₂", "O₂", "H₂O", "NaCl"],
+                "correct_answer": "H₂O"
             },
             {
                 "question": "Скільки ніг має павук?",

@@ -188,7 +188,7 @@ def create_intro_window(root):
         else:
             tk.messagebox.showinfo("Помилка", "Збережена гра не знайдена.")
 
-    title_label = tk.Label(root, text='Вітаємо на грі "Хто хоче стати мільйонером!"', font=("Helvetica", 19, "bold"),
+    title_label = tk.Label(root, text='Вітаємо на грі "Хто хоче стати мільйонером?"', font=("Helvetica", 19, "bold"),
                            padx=80, fg="#fff", bg="#B75F07")
     title_label.pack(pady=40)
 
@@ -246,7 +246,7 @@ def show_result_window(root, is_winner, final_prize=None):
         widget.destroy()
 
     root.deiconify()
-    root.title("Результати вікторина «Хто хоче стати мільйонером?»")
+    root.title("Результати вікторини «Хто хоче стати мільйонером?»")
     center_window(root, 800, 550)
     root.configure(bg="#00001B")
 
@@ -344,7 +344,7 @@ def show_question_window(root):
         }
         with open("savegame.json", "w") as f:
             json.dump(game_state, f)
-        create_popup_message("Гра успішно збережена!")
+        create_popup_message("Гру успішно збережено!")
 
     def create_popup_message(message):
         popup = tk.Toplevel(root)
@@ -578,3 +578,4 @@ def show_question_window(root):
     else:
         error_label = tk.Label(root, text="Помилка: Питання не знайдено.", fg="red", bg="#00001B")
         error_label.pack()
+        
