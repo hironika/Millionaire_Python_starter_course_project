@@ -6,6 +6,20 @@ import json
 import os
 import pygame
 import webbrowser
+import sys # Додаємо sys для resource_path
+
+def resource_path(relative_path):
+    """
+    Отримує абсолютний шлях до ресурсу, незалежно від того,
+    запущений скрипт як виконуваний файл чи з вихідного коду.
+    """
+    try:
+        # PyInstaller створює тимчасову папку і зберігає шлях у _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        # Використовуємо поточну директорію, якщо скрипт запускається звичайним чином
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 # Ініціалізуємо pygame mixer
 pygame.mixer.init()
@@ -41,37 +55,37 @@ def load_all_icons():
     global lifeline_icons, money_icon
     try:
         image_size = (30, 30)
+        # Використовуємо resource_path() для правильного завантаження зображень
         lifeline_icons["50/50"] = {
-            "blue": ImageTk.PhotoImage(Image.open("images/50_50_blue.png").resize(image_size)),
-            "yellow": ImageTk.PhotoImage(Image.open("images/50_50_yellow.png").resize(image_size)),
-            "red": ImageTk.PhotoImage(Image.open("images/50_50_red.png").resize(image_size))
+            "blue": ImageTk.PhotoImage(Image.open(resource_path("images/50_50_blue.png")).resize(image_size)),
+            "yellow": ImageTk.PhotoImage(Image.open(resource_path("images/50_50_yellow.png")).resize(image_size)),
+            "red": ImageTk.PhotoImage(Image.open(resource_path("images/50_50_red.png")).resize(image_size))
         }
         lifeline_icons["Дзвінок другу"] = {
-            "blue": ImageTk.PhotoImage(Image.open("images/phone_blue.png").resize(image_size)),
-            "yellow": ImageTk.PhotoImage(Image.open("images/phone_yellow.png").resize(image_size)),
-            "red": ImageTk.PhotoImage(Image.open("images/phone_red.png").resize(image_size))
+            "blue": ImageTk.PhotoImage(Image.open(resource_path("images/phone_blue.png")).resize(image_size)),
+            "yellow": ImageTk.PhotoImage(Image.open(resource_path("images/phone_yellow.png")).resize(image_size)),
+            "red": ImageTk.PhotoImage(Image.open(resource_path("images/phone_red.png")).resize(image_size))
         }
         lifeline_icons["Допомога зали"] = {
-            "blue": ImageTk.PhotoImage(Image.open("images/audience_blue.png").resize(image_size)),
-            "yellow": ImageTk.PhotoImage(Image.open("images/audience_yellow.png").resize(image_size)),
-            "red": ImageTk.PhotoImage(Image.open("images/audience_red.png").resize(image_size))
+            "blue": ImageTk.PhotoImage(Image.open(resource_path("images/audience_blue.png")).resize(image_size)),
+            "yellow": ImageTk.PhotoImage(Image.open(resource_path("images/audience_yellow.png")).resize(image_size)),
+            "red": ImageTk.PhotoImage(Image.open(resource_path("images/audience_red.png")).resize(image_size))
         }
-        money_icon = ImageTk.PhotoImage(Image.open("images/money.png").resize(image_size))
+        money_icon = ImageTk.PhotoImage(Image.open(resource_path("images/money.png")).resize(image_size))
     except FileNotFoundError:
         print("Помилка: Не знайдено файли іконок. Переконайтеся, що вони в тій самій папці.")
         lifeline_icons.clear()
         money_icon = None
 
-
 def play_background_music(music_file):
     """Функція для відтворення музики. Приймає ім'я файлу."""
-    pygame.mixer.music.load(os.path.join("sounds", music_file))
+    pygame.mixer.music.load(resource_path(os.path.join("sounds", music_file)))
     pygame.mixer.music.play(-1)  # Відтворення музики у нескінченному циклі
 
 
 def play_sound_effect(sound_file):
     """Відтворює одноразовий звуковий ефект."""
-    sound = pygame.mixer.Sound(os.path.join("sounds", sound_file))
+    sound = pygame.mixer.Sound(resource_path(os.path.join("sounds", sound_file)))
     sound.play()
 
 
@@ -109,7 +123,7 @@ def load_gif_frames(gif_path):
     global gif_frames, gif_delay
     gif_frames = []
     try:
-        gif = Image.open(os.path.join("images", gif_path))
+        gif = Image.open(resource_path(os.path.join("images", gif_path)))
         for frame in ImageSequence.Iterator(gif):
             gif_frames.append(ImageTk.PhotoImage(frame.resize((256, 256))))
         gif_delay = gif.info['duration']
@@ -280,7 +294,7 @@ def show_result_window(root, is_winner, final_prize=None):
     exit_button.pack(side="left", padx=(15, 0), pady=40)
 
     def open_telegram_profile():
-        webbrowser.open_new("https://t.me/tatyanakohan") # <-- Твоє посилання
+        webbrowser.open_new("https://t.me/tatyanakohan") # <-- Моє посилання
 
     telegram_link_label = tk.Label(root, text="Розробник у Telegram",
                                    font=("Helvetica", 12, "underline"),
