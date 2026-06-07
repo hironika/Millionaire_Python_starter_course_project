@@ -46,3 +46,18 @@
 1. **Клонуйте репозиторій:**
    ```bash
    git clone https://github.com/hironika/Millionaire_Python_starter_course_project.git
+
+   ### Крок 2. Перейдіть у папку проєкту
+Обов'язково зайдіть всередину завантаженої папки, щоб термінал мав доступ до файлів гри:
+```bash
+cd Millionaire_Python_starter_course_project
+
+### Крок 3. Встановіть необхідні бібліотеки
+Для коректної роботи графіки, звуку та анімацій встановіть залежності, які прописані у файлі `requirements.txt`:
+```bash
+pip install -r requirements.txt
+
+### Крок 4. Запустіть гру
+Тепер усе готово! Запустіть головний файл програми для старту вікторини:
+```bash
+python main.py
